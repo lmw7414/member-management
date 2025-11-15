@@ -23,6 +23,22 @@ public class MemberService {
         return Member.fromEntity(memberRepository.save(memberEntity));
     }
 
+    // 로그인
+    public String login(String username, String password) {
+        Member member = loadMemberByUsername(username);
+        if(!member.password().equals(password)) {
+            throw new CommonException(ErrorCode.INVALID_PASSWORD);
+        }
+        return "success";
+    }
+
+    // 유저 정보 단건 조회
+    public Member loadMemberByUsername(String username) {
+        return memberRepository.findByUsername(username).map(Member::fromEntity).orElseThrow(
+                () -> new CommonException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username))
+        );
+    }
+
     private void checkUsernameExistenceOrException(String username) {
         memberRepository.findByUsername(username).ifPresent(it -> {
             throw new CommonException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s is duplicated", username));
