@@ -6,6 +6,7 @@ import com.example.membermanagement.member.model.Member;
 import com.example.membermanagement.member.model.MemberEntity;
 import com.example.membermanagement.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,20 +16,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     // 회원가입
     @Transactional
     public Member join(String username, String password, String email) {
         checkUsernameExistenceOrException(username); // 이미 존재하는 username인지 체크
-        MemberEntity memberEntity = MemberEntity.of(username, password, email);
-        // TODO 비밀번호 암호화
+        MemberEntity memberEntity = MemberEntity.of(username, passwordEncoder.encode(password), email);
         return Member.fromEntity(memberRepository.save(memberEntity));
     }
 
     // 로그인
+    @Transactional
     public String login(String username, String password) {
         Member member = loadMemberByUsername(username);
-        if(!member.password().equals(password)) {
+        if(!passwordEncoder.matches(password, member.password())) {
             throw new CommonException(ErrorCode.INVALID_PASSWORD);
         }
         return "success";

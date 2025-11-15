@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -27,6 +28,8 @@ class MemberServiceTest {
     private MemberService sut;
     @MockitoBean
     private MemberRepository memberRepository;
+    @MockitoBean
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Test
     void 회원가입시_정상동작() {
@@ -37,6 +40,7 @@ class MemberServiceTest {
 
         // mocking
         when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(password)).thenReturn("encrypt_password");
         when(memberRepository.save(any())).thenReturn(fixture);
 
         assertDoesNotThrow(() -> sut.join(username, password, email));
@@ -66,6 +70,7 @@ class MemberServiceTest {
 
         //mocking
         when(memberRepository.findByUsername(anyString())).thenReturn(Optional.of(fixture));
+        when(passwordEncoder.matches(password, fixture.getPassword())).thenReturn(true);
 
         assertDoesNotThrow(() -> sut.login(username, password));
     }
