@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -33,10 +35,17 @@ public class MemberService {
     }
 
     // 유저 정보 단건 조회
+    @Transactional(readOnly = true)
     public Member loadMemberByUsername(String username) {
         return memberRepository.findByUsername(username).map(Member::fromEntity).orElseThrow(
                 () -> new CommonException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username))
         );
+    }
+
+    // 멤버 전체 조회
+    @Transactional(readOnly = true)
+    public List<Member> loadAllMembers() {
+        return memberRepository.findAll().stream().map(Member::fromEntity).toList();
     }
 
     private void checkUsernameExistenceOrException(String username) {
