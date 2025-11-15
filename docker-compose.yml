@@ -1,0 +1,13 @@
+services:
+  mariadb-server:
+    image: mariadb:10
+    environment:
+      - MARIADB_DATABASE=member_management
+      - MARIADB_USER=${SPRING_DATASOURCE_USERNAME}
+      - MARIADB_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - "TZ=Asia/Seoul"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
