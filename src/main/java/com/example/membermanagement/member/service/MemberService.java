@@ -22,6 +22,7 @@ public class MemberService {
     @Transactional
     public Member join(String username, String password, String email) {
         checkUsernameExistenceOrException(username); // 이미 존재하는 username인지 체크
+        checkEmailExistenceOrException(email); // 이미 존재하는 email인지 체크
         MemberEntity memberEntity = MemberEntity.of(username, passwordEncoder.encode(password), email);
         return Member.fromEntity(memberRepository.save(memberEntity));
     }
@@ -53,6 +54,12 @@ public class MemberService {
     private void checkUsernameExistenceOrException(String username) {
         memberRepository.findByUsername(username).ifPresent(it -> {
             throw new CommonException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s is duplicated", username));
+        });
+    }
+
+    private void checkEmailExistenceOrException(String email) {
+        memberRepository.findByEmail(email).ifPresent(it -> {
+            throw new CommonException(ErrorCode.DUPLICATED_EMAIL, String.format("%s is duplicated", email));
         });
     }
 }

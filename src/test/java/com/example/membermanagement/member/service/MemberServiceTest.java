@@ -62,6 +62,21 @@ class MemberServiceTest {
     }
 
     @Test
+    void 회원가입시_이미_존재하는_email이라면_4XX에러반환() {
+        String username = "test-username";
+        String password = "test-password";
+        String email = "test-email";
+        MemberEntity fixture = createMember(username, password, email);
+
+        // mocking
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(fixture));
+
+        CommonException e = assertThrows(CommonException.class, () -> sut.join(username, password, email));
+        assertEquals(ErrorCode.DUPLICATED_EMAIL, e.getErrorCode());
+    }
+
+    @Test
     void 로그인시_정상동작() {
         String username = "test-username";
         String password = "test-password";
